@@ -8,7 +8,7 @@ export default function Home() {
 
   return (
     <main>
-      <div>
+      <div className="max-w-6xl m-auto">
         <h1 className="text-3xl">{MODES[selectedModeIndex].name}</h1>
         <h1 className="text-1xl">{MODES[selectedModeIndex].description}</h1>
         <p></p>
