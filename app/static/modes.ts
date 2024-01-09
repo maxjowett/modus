@@ -48,3 +48,13 @@ export const MODES: Mode[] = [
       "A major scale pattern starting on the 7th degree. The Locrian mode is dense and thorny and rarely used. Sometimes jazz soloists use it over diminished chords, but it doesn’t sound pleasing in long passages.",
   },
 ];
+
+export const MODE_MAP: any = {
+  1: "I",
+  2: "II",
+  3: "III",
+  4: "IV",
+  5: "V",
+  6: "VI",
+  7: "VII",
+};
