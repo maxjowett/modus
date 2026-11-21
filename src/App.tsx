@@ -5,12 +5,7 @@ import { ListenControl } from "./components/ListenControl";
 import { LiveNote } from "./components/LiveNote";
 import { NoteGroup } from "./components/NoteGroup";
 import { ScaleResults } from "./components/ScaleResults";
-import {
-	MIN_GROUP_SIZE,
-	matchFits,
-	matchKey,
-	type ScaleMatch,
-} from "./music/match";
+import { isListed, matchKey, type ScaleMatch } from "./music/match";
 import type { PitchClass } from "./music/notes";
 
 export default function App() {
@@ -20,9 +15,7 @@ export default function App() {
 
 	// Hide the fretboard while the selected scale isn't in the results.
 	const shownScale =
-		selected && group.size >= MIN_GROUP_SIZE && matchFits(selected, group)
-			? selected
-			: null;
+		selected && isListed(selected.notes, group) ? selected : null;
 	const closeFretboard = useCallback(() => setSelected(null), []);
 	// Clicking the selected scale again closes it.
 	const selectScale = useCallback(
@@ -72,7 +65,12 @@ export default function App() {
 	return (
 		<main>
 			<header className="app-header">
-				<h1>modus</h1>
+				<div>
+					<h1>modus</h1>
+					<p className="tagline">
+						Play a few notes. Find the scales they belong to.
+					</p>
+				</div>
 				<ListenControl
 					status={status}
 					error={error}
@@ -80,22 +78,32 @@ export default function App() {
 					onStop={stop}
 				/>
 			</header>
-			<LiveNote
-				reading={reading}
-				listening={status === "listening"}
-				canAdd={canAdd}
-				inGroup={inGroup}
-				onAdd={addCurrent}
-			/>
-			<NoteGroup group={group} onToggle={toggle} onClear={clear} />
-			{shownScale && (
-				<Fretboard match={shownScale} group={group} onClose={closeFretboard} />
-			)}
-			<ScaleResults
-				group={group}
-				selectedKey={shownScale && matchKey(shownScale)}
-				onSelect={selectScale}
-			/>
+			<div className="layout">
+				<div className="controls">
+					<LiveNote
+						reading={reading}
+						listening={status === "listening"}
+						canAdd={canAdd}
+						inGroup={inGroup}
+						onAdd={addCurrent}
+					/>
+					<NoteGroup group={group} onToggle={toggle} onClear={clear} />
+				</div>
+				<div className="study">
+					{shownScale && (
+						<Fretboard
+							match={shownScale}
+							group={group}
+							onClose={closeFretboard}
+						/>
+					)}
+					<ScaleResults
+						group={group}
+						selectedKey={shownScale && matchKey(shownScale)}
+						onSelect={selectScale}
+					/>
+				</div>
+			</div>
 		</main>
 	);
 }

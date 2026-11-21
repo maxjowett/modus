@@ -3,9 +3,10 @@ import {
 	findCompatibleScales,
 	MIN_GROUP_SIZE,
 	matchKey,
+	NEAR_MISS_FROM,
 	type ScaleMatch,
 } from "../music/match";
-import { type PitchClass, pitchClassName } from "../music/notes";
+import { noteLabel, type PitchClass } from "../music/notes";
 
 interface Props {
 	group: ReadonlySet<PitchClass>;
@@ -21,6 +22,7 @@ export const ScaleResults = memo(function ScaleResults({
 	const families = useMemo(() => findCompatibleScales(group), [group]);
 	const count = families.reduce((sum, f) => sum + f.matches.length, 0);
 	const notesNeeded = MIN_GROUP_SIZE - group.size;
+	const showPercent = group.size >= NEAR_MISS_FROM;
 
 	return (
 		<section className="results">
@@ -53,8 +55,18 @@ export const ScaleResults = memo(function ScaleResults({
 										aria-pressed={key === selectedKey}
 										onClick={() => onSelect(match)}
 									>
-										<span className="match-name">
-											{pitchClassName(match.root)} {match.scale.name}
+										<span className="match-head">
+											<span className="match-name">
+												{noteLabel(match.root)} {match.scale.name}
+											</span>
+											{showPercent && (
+												<span
+													className="match-percent"
+													title={`${group.size - match.missing.length} of your ${group.size} notes are in this scale`}
+												>
+													{Math.round(match.fit * 100)}% match
+												</span>
+											)}
 										</span>
 										<span className="match-notes">
 											{match.notes.map((pc) => (
@@ -62,10 +74,15 @@ export const ScaleResults = memo(function ScaleResults({
 													key={pc}
 													className={group.has(pc) ? "hit" : undefined}
 												>
-													{pitchClassName(pc)}
+													{noteLabel(pc)}
 												</span>
 											))}
 										</span>
+										{match.missing.length > 0 && (
+											<span className="match-missing">
+												not in scale: {match.missing.map(noteLabel).join(" ")}
+											</span>
+										)}
 									</button>
 								</li>
 							);

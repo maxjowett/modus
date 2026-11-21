@@ -31,6 +31,11 @@ export function pitchClassName(pc: PitchClass): PitchClassName {
 	return PITCH_CLASSES[pc];
 }
 
+/** Name for display, with a real sharp sign: "C♯" rather than "C#". */
+export function noteLabel(pc: PitchClass): string {
+	return PITCH_CLASSES[pc].replace("#", "♯");
+}
+
 export function pitchClassFromName(name: PitchClassName): PitchClass {
 	return PITCH_CLASSES.indexOf(name);
 }

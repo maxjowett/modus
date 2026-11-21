@@ -5,8 +5,8 @@ import {
 	INLAY_FRETS,
 	STANDARD_TUNING,
 } from "../music/guitar";
-import type { ScaleMatch } from "../music/match";
-import { type PitchClass, pitchClassName } from "../music/notes";
+import { missingNotes, type ScaleMatch } from "../music/match";
+import { noteLabel, type PitchClass } from "../music/notes";
 
 interface Props {
 	match: ScaleMatch;
@@ -16,12 +16,13 @@ interface Props {
 
 // SVG layout, in viewBox units.
 const FRET_WIDTH = 56;
-const STRING_GAP = 30;
+const STRING_GAP = 34;
 const OPEN_WIDTH = 40; // space left of the nut for open-string notes
 const PAD_X = 12;
-const PAD_TOP = 18;
+const PAD_TOP = 20;
 const NUMBERS_HEIGHT = 26; // fret numbers under the neck
-const DOT_RADIUS = 11.5;
+const DOT_RADIUS = 13;
+const NECK_OVERHANG = 10; // wood beyond the outer strings
 
 const STRINGS = STANDARD_TUNING.length;
 const NUT_X = PAD_X + OPEN_WIDTH;
@@ -44,8 +45,10 @@ export const Fretboard = memo(function Fretboard({
 	group,
 	onClose,
 }: Props) {
-	const title = `${pitchClassName(match.root)} ${match.scale.name}`;
-	const positions = fretPositions(match.notes);
+	const title = `${noteLabel(match.root)} ${match.scale.name}`;
+	// Your notes that fall outside the scale are drawn too, marked as such.
+	const missing = missingNotes(match.notes, group);
+	const positions = fretPositions([...match.notes, ...missing]);
 
 	return (
 		<section className="fretboard">
@@ -65,6 +68,15 @@ export const Fretboard = memo(function Fretboard({
 					<title id="fretboard-title">
 						{`${title} on a guitar neck, frets 0 to ${FRET_COUNT}`}
 					</title>
+
+					<rect
+						className="fb-neck"
+						x={NUT_X}
+						y={PAD_TOP - NECK_OVERHANG}
+						width={NECK_WIDTH}
+						height={NECK_HEIGHT + NECK_OVERHANG * 2}
+						rx={3}
+					/>
 
 					{INLAY_FRETS.map((fret) =>
 						fret === 12 ? (
@@ -89,16 +101,16 @@ export const Fretboard = memo(function Fretboard({
 							className="fb-fret"
 							x1={NUT_X + fret * FRET_WIDTH}
 							x2={NUT_X + fret * FRET_WIDTH}
-							y1={PAD_TOP}
-							y2={PAD_TOP + NECK_HEIGHT}
+							y1={PAD_TOP - NECK_OVERHANG}
+							y2={PAD_TOP + NECK_HEIGHT + NECK_OVERHANG}
 						/>
 					))}
 					<line
 						className="fb-nut"
 						x1={NUT_X}
 						x2={NUT_X}
-						y1={PAD_TOP - 1}
-						y2={PAD_TOP + NECK_HEIGHT + 1}
+						y1={PAD_TOP - NECK_OVERHANG}
+						y2={PAD_TOP + NECK_HEIGHT + NECK_OVERHANG}
 					/>
 
 					{STRING_INDEXES.map((string) => (
@@ -126,8 +138,9 @@ export const Fretboard = memo(function Fretboard({
 					))}
 
 					{positions.map(({ string, fret, pitchClass }) => {
-						const kind =
-							pitchClass === match.root
+						const kind = missing.includes(pitchClass)
+							? "outside"
+							: pitchClass === match.root
 								? "root"
 								: group.has(pitchClass)
 									? "played"
@@ -135,8 +148,8 @@ export const Fretboard = memo(function Fretboard({
 						return (
 							<g key={`${string}-${fret}`} className={`fb-note fb-${kind}`}>
 								<circle cx={fretX(fret)} cy={stringY(string)} r={DOT_RADIUS} />
-								<text x={fretX(fret)} y={stringY(string) + 4}>
-									{pitchClassName(pitchClass)}
+								<text x={fretX(fret)} y={stringY(string) + 4.5}>
+									{noteLabel(pitchClass)}
 								</text>
 							</g>
 						);
@@ -154,6 +167,11 @@ export const Fretboard = memo(function Fretboard({
 				<li>
 					<span className="swatch fb-scale" /> Other scale notes
 				</li>
+				{missing.length > 0 && (
+					<li>
+						<span className="swatch fb-outside" /> Your notes outside the scale
+					</li>
+				)}
 			</ul>
 		</section>
 	);

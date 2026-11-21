@@ -1,5 +1,5 @@
 import type { PitchReading } from "../audio/usePitchDetector";
-import { pitchClassName } from "../music/notes";
+import { noteLabel } from "../music/notes";
 
 interface Props {
 	reading: PitchReading | null;
@@ -8,6 +8,9 @@ interface Props {
 	inGroup: boolean;
 	onAdd: () => void;
 }
+
+/** Within this many cents of the note counts as in tune on the meter. */
+const IN_TUNE_CENTS = 5;
 
 function describe(reading: PitchReading | null, listening: boolean): string {
 	if (reading) {
@@ -26,17 +29,26 @@ export function LiveNote({
 }: Props) {
 	return (
 		<section className="live-note" aria-live="polite">
-			<div className="note-name">
-				{reading ? pitchClassName(reading.pitchClass) : "–"}
+			<p className="eyebrow">Hearing</p>
+			<div className={reading ? "note-name" : "note-name is-empty"}>
+				{reading ? noteLabel(reading.pitchClass) : "—"}
 			</div>
 			<div className="meter" aria-hidden="true">
-				<div className="meter-center" />
-				{reading && (
-					<div
-						className="meter-needle"
-						style={{ left: `${50 + reading.cents}%` }}
-					/>
-				)}
+				<span className="meter-flat">♭</span>
+				<div className="meter-track">
+					<div className="meter-center" />
+					{reading && (
+						<div
+							className={
+								Math.abs(reading.cents) <= IN_TUNE_CENTS
+									? "meter-needle in-tune"
+									: "meter-needle"
+							}
+							style={{ left: `${50 + reading.cents}%` }}
+						/>
+					)}
+				</div>
+				<span className="meter-sharp">♯</span>
 			</div>
 			<p className="note-detail">{describe(reading, listening)}</p>
 			<button type="button" onClick={onAdd} disabled={!canAdd}>

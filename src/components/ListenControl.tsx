@@ -9,19 +9,22 @@ interface Props {
 
 const LABEL: Record<ListenStatus, string> = {
 	idle: "Start listening",
-	starting: "Starting…",
-	listening: "Stop listening",
+	starting: "Opening the mic…",
+	listening: "Listening",
 };
 
 export function ListenControl({ status, error, onStart, onStop }: Props) {
+	const listening = status === "listening";
 	return (
-		<div>
+		<div className="listen">
 			<button
 				type="button"
-				className="primary"
-				onClick={status === "listening" ? onStop : onStart}
+				className={listening ? "primary is-listening" : "primary"}
+				onClick={listening ? onStop : onStart}
 				disabled={status === "starting"}
+				aria-label={listening ? "Stop listening" : undefined}
 			>
+				<span className="listen-dot" aria-hidden="true" />
 				{LABEL[status]}
 			</button>
 			{error && <p className="error">{error}</p>}
