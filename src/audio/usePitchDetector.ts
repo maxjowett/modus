@@ -18,6 +18,8 @@ const MIN_RMS = 0.01; // pitchy returns [0, 0] for quieter input
 const MIN_HZ = 70;
 const MAX_HZ = 1400;
 const STABLE_FRAMES = 6;
+/** After this long without a steady pitch, the reading counts as last heard, not live. */
+const SILENCE_MS = 1500;
 
 function describeError(err: unknown): string {
 	if (err instanceof DOMException) {
@@ -31,6 +33,8 @@ export function usePitchDetector() {
 	const [status, setStatus] = useState<ListenStatus>("idle");
 	const [error, setError] = useState<string | null>(null);
 	const [reading, setReading] = useState<PitchReading | null>(null);
+	/** Whether `reading` is being heard now, rather than the last note heard. */
+	const [live, setLive] = useState(false);
 
 	const teardownRef = useRef<(() => void) | null>(null);
 
@@ -38,6 +42,7 @@ export function usePitchDetector() {
 		teardownRef.current?.();
 		teardownRef.current = null;
 		setReading(null);
+		setLive(false);
 		setStatus("idle");
 	}, []);
 
@@ -68,14 +73,21 @@ export function usePitchDetector() {
 			let candidate: PitchClass | null = null;
 			let candidateFrames = 0;
 			let shown: PitchReading | null = null;
+			let isLive = false;
+			let lastSteadyAt = 0;
 
-			const tick = () => {
+			const tick = (now: number) => {
 				frame = requestAnimationFrame(tick);
 				analyser.getFloatTimeDomainData(buffer);
 				const [hz, clarity] = detector.findPitch(buffer, context.sampleRate);
 				if (clarity < MIN_CLARITY || hz < MIN_HZ || hz > MAX_HZ) {
 					candidate = null;
 					candidateFrames = 0;
+					// Keep the last reading (it can still be added), but stop calling it live.
+					if (isLive && now - lastSteadyAt > SILENCE_MS) {
+						isLive = false;
+						setLive(false);
+					}
 					return;
 				}
 
@@ -83,6 +95,12 @@ export function usePitchDetector() {
 				candidateFrames = pitchClass === candidate ? candidateFrames + 1 : 1;
 				candidate = pitchClass;
 				if (candidateFrames < STABLE_FRAMES) return;
+
+				lastSteadyAt = now;
+				if (!isLive) {
+					isLive = true;
+					setLive(true);
+				}
 
 				// Only re-render when something on screen would change.
 				const frequency = Math.round(hz * 10) / 10;
@@ -113,5 +131,5 @@ export function usePitchDetector() {
 
 	useEffect(() => () => teardownRef.current?.(), []);
 
-	return { status, error, reading, start, stop };
+	return { status, error, reading, live, start, stop };
 }

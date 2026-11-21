@@ -295,6 +295,15 @@ h1 {
 	margin-left: -0.08em;
 }
 
+/* The last note heard, kept so it can still be added, but plainly not live. */
+.note-name.is-stale {
+	color: var(--ink-soft);
+	opacity: 0.55;
+	transition:
+		opacity 400ms ease,
+		color 400ms ease;
+}
+
 .note-name.is-empty {
 	color: var(--rule);
 }

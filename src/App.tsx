@@ -9,7 +9,7 @@ import { isListed, matchKey, type ScaleMatch } from "./music/match";
 import type { PitchClass } from "./music/notes";
 
 export default function App() {
-	const { status, error, reading, start, stop } = usePitchDetector();
+	const { status, error, reading, live, start, stop } = usePitchDetector();
 	const [group, setGroup] = useState<ReadonlySet<PitchClass>>(new Set());
 	const [selected, setSelected] = useState<ScaleMatch | null>(null);
 
@@ -82,6 +82,7 @@ export default function App() {
 				<div className="controls">
 					<LiveNote
 						reading={reading}
+						live={live}
 						listening={status === "listening"}
 						canAdd={canAdd}
 						inGroup={inGroup}
@@ -89,7 +90,7 @@ export default function App() {
 					/>
 					<NoteGroup
 						group={group}
-						hearing={reading?.pitchClass ?? null}
+						hearing={live ? (reading?.pitchClass ?? null) : null}
 						onToggle={toggle}
 						onClear={clear}
 					/>
