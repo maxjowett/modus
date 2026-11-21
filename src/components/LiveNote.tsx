@@ -32,7 +32,14 @@ export function LiveNote({
 		<section className="live-note" aria-live="polite">
 			<p className="eyebrow">Hearing</p>
 			<div className={reading ? "note-name" : "note-name is-empty"}>
-				{reading ? <NoteName name={noteLabel(reading.pitchClass)} /> : "—"}
+				{reading ? (
+					// Keyed by note, so each new note replays the ease-in.
+					<span key={reading.pitchClass} className="note-in">
+						<NoteName name={noteLabel(reading.pitchClass)} />
+					</span>
+				) : (
+					"—"
+				)}
 			</div>
 			<div className="meter" aria-hidden="true">
 				<span className="meter-flat">♭</span>

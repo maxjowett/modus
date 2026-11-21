@@ -449,6 +449,39 @@ h1 {
 	color: var(--indigo-text);
 }
 
+/* Feedback while playing */
+
+/* The note being detected right now, in the grid. */
+.manual button.is-hearing {
+	box-shadow:
+		0 0 0 2px var(--paper),
+		0 0 0 4px var(--rosewood);
+}
+
+/* New chips and each newly heard note ease in. */
+.chip {
+	animation: arrive 220ms ease-out;
+}
+
+.note-in {
+	display: inline-block;
+	animation: arrive 180ms ease-out;
+}
+
+@keyframes arrive {
+	from {
+		opacity: 0;
+		transform: translateY(4px) scale(0.96);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.chip,
+	.note-in {
+		animation: none;
+	}
+}
+
 /* Compatible scales */
 
 .results h2 {
@@ -501,12 +534,54 @@ h1 {
 	gap: 12px;
 }
 
-.match-percent {
+.match-fit {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	flex-shrink: 0;
 	font-family: var(--mono);
 	font-size: 0.75rem;
 	font-weight: 500;
 	color: var(--ink-soft);
 	font-variant-numeric: tabular-nums;
+}
+
+/* A short bar beside "% match", so fits can be compared at a glance. */
+.fit-bar {
+	position: relative;
+	width: 36px;
+	height: 3px;
+	border-radius: 2px;
+	background: var(--rule);
+	overflow: hidden;
+}
+
+.fit-bar > span {
+	position: absolute;
+	inset: 0 auto 0 0;
+	background: var(--ink-soft);
+	border-radius: 2px;
+}
+
+.fit-bar > .full {
+	background: var(--indigo);
+}
+
+/* Close matches sit a little apart from the exact fits above them. */
+.results ul + .close-matches {
+	margin-top: 6px;
+	padding-top: 6px;
+	border-top: 1px dashed var(--rule);
+}
+
+.results .no-exact {
+	margin: 4px 0 0;
+	font-size: 0.9375rem;
+}
+
+.results .more {
+	margin-top: 8px;
+	font-size: 0.875rem;
 }
 
 .match-name {
@@ -569,6 +644,15 @@ h1 {
 
 .fretboard > header h2 {
 	font-size: 1.75rem;
+}
+
+/* "Ionian" after "C major": a quiet italic aside. */
+.alt-name {
+	margin-left: 0.5em;
+	font-size: 0.7em;
+	font-style: italic;
+	font-weight: 400;
+	color: var(--ink-soft);
 }
 
 .fretboard > header button {

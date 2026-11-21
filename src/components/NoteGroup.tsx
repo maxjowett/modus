@@ -5,6 +5,8 @@ import { NoteName } from "./NoteName";
 
 interface Props {
 	group: ReadonlySet<PitchClass>;
+	/** The note being detected right now, highlighted in the grid. */
+	hearing: PitchClass | null;
 	onToggle: (pc: PitchClass) => void;
 	onClear: () => void;
 }
@@ -21,6 +23,7 @@ function BothNames({ pc }: { pc: PitchClass }) {
 
 export const NoteGroup = memo(function NoteGroup({
 	group,
+	hearing,
 	onToggle,
 	onClear,
 }: Props) {
@@ -47,6 +50,7 @@ export const NoteGroup = memo(function NoteGroup({
 							key={key}
 							type="button"
 							aria-pressed={group.has(pc)}
+							className={pc === hearing ? "is-hearing" : undefined}
 							aria-label={names.join(" / ")}
 							onClick={() => onToggle(pc)}
 						>

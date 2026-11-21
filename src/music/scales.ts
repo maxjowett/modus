@@ -14,7 +14,10 @@ export type ScaleFamily = (typeof FAMILY_ORDER)[number];
 
 export interface Scale {
 	id: string;
+	/** As a musician would write it after the root: "C major", "D Dorian". */
 	name: string;
+	/** Another common name, shown as a subtitle: "Ionian" for major. */
+	altName?: string;
 	family: ScaleFamily;
 	/** Semitones above the root, ascending, starting at 0. */
 	intervals: number[];
@@ -36,14 +39,14 @@ export interface Scale {
 function modesOf(
 	parent: number[],
 	family: ScaleFamily,
-	names: [id: string, name: string][],
+	names: [id: string, name: string, altName?: string][],
 ): Scale[] {
-	return names.map(([id, name], degree) => {
+	return names.map(([id, name, altName], degree) => {
 		const offset = parent[degree];
 		const intervals = parent
 			.map((step) => toPitchClass(step - offset))
 			.sort((a, b) => a - b);
-		return { id, name, family, intervals, mode: degree + 1 };
+		return { id, name, altName, family, intervals, mode: degree + 1 };
 	});
 }
 
@@ -58,44 +61,44 @@ const MELODIC_MINOR = [0, 2, 3, 5, 7, 9, 11];
 
 export const SCALES: Scale[] = [
 	...modesOf(MAJOR, "Major", [
-		["ionian", "Major (Ionian)"],
+		["ionian", "major", "Ionian"],
 		["dorian", "Dorian"],
 		["phrygian", "Phrygian"],
 		["lydian", "Lydian"],
 		["mixolydian", "Mixolydian"],
-		["aeolian", "Natural minor (Aeolian)"],
+		["aeolian", "natural minor", "Aeolian"],
 		["locrian", "Locrian"],
 	]),
 	{
 		id: "major-pentatonic",
-		name: "Major pentatonic",
+		name: "major pentatonic",
 		family: "Pentatonic & blues",
 		intervals: [0, 2, 4, 7, 9],
 		degrees: [1, 2, 3, 5, 6],
 	},
 	{
 		id: "minor-pentatonic",
-		name: "Minor pentatonic",
+		name: "minor pentatonic",
 		family: "Pentatonic & blues",
 		intervals: [0, 3, 5, 7, 10],
 		degrees: [1, 3, 4, 5, 7],
 	},
 	{
 		id: "major-blues",
-		name: "Major blues",
+		name: "major blues",
 		family: "Pentatonic & blues",
 		intervals: [0, 2, 3, 4, 7, 9],
 		degrees: [1, 2, 3, 3, 5, 6],
 	},
 	{
 		id: "minor-blues",
-		name: "Minor blues",
+		name: "minor blues",
 		family: "Pentatonic & blues",
 		intervals: [0, 3, 5, 6, 7, 10],
 		degrees: [1, 3, 4, 5, 5, 7],
 	},
 	...modesOf(HARMONIC_MINOR, "Harmonic minor", [
-		["harmonic-minor", "Harmonic minor"],
+		["harmonic-minor", "harmonic minor"],
 		["locrian-nat6", "Locrian ♮6"],
 		["ionian-sharp5", "Ionian ♯5"],
 		["dorian-sharp4", "Dorian ♯4"],
@@ -104,38 +107,38 @@ export const SCALES: Scale[] = [
 		["super-locrian-bb7", "Super Locrian ♭♭7"],
 	]),
 	...modesOf(MELODIC_MINOR, "Melodic minor", [
-		["melodic-minor", "Melodic minor"],
+		["melodic-minor", "melodic minor"],
 		["dorian-b2", "Dorian ♭2"],
 		["lydian-augmented", "Lydian augmented"],
 		["lydian-dominant", "Lydian dominant"],
 		["mixolydian-b6", "Mixolydian ♭6"],
 		["locrian-nat2", "Locrian ♮2"],
-		["altered", "Altered (Super Locrian)"],
+		["altered", "altered", "Super Locrian"],
 	]),
 	{
 		id: "whole-tone",
-		name: "Whole tone",
+		name: "whole tone",
 		family: "Symmetric",
 		intervals: [0, 2, 4, 6, 8, 10],
 		degrees: [1, 2, 3, 4, 5, 7],
 	},
 	{
 		id: "diminished-hw",
-		name: "Diminished (half-whole)",
+		name: "half-whole diminished",
 		family: "Symmetric",
 		intervals: [0, 1, 3, 4, 6, 7, 9, 10],
 		degrees: [1, 2, 3, 3, 4, 5, 6, 7],
 	},
 	{
 		id: "diminished-wh",
-		name: "Diminished (whole-half)",
+		name: "whole-half diminished",
 		family: "Symmetric",
 		intervals: [0, 2, 3, 5, 6, 8, 9, 11],
 		degrees: [1, 2, 3, 4, 5, 6, 6, 7],
 	},
 	{
 		id: "double-harmonic",
-		name: "Double harmonic",
+		name: "double harmonic",
 		family: "Other",
 		intervals: [0, 1, 4, 5, 7, 8, 11],
 	},
@@ -180,7 +183,7 @@ export const SCALES: Scale[] = [
 	},
 	{
 		id: "bebop-dominant",
-		name: "Bebop dominant",
+		name: "bebop dominant",
 		family: "Other",
 		intervals: [0, 2, 4, 5, 7, 9, 10, 11],
 		degrees: [1, 2, 3, 4, 5, 6, 7, 7],

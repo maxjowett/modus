@@ -89,13 +89,49 @@ describe("spellScale", () => {
 		}
 	});
 
-	it("uses each letter once in 7-note scales", () => {
-		for (const s of SCALES.filter((s) => s.intervals.length === 7)) {
+	it("uses each letter once in key-based scales", () => {
+		const keyFamilies = ["Major", "Harmonic minor", "Melodic minor"];
+		for (const s of SCALES.filter((s) => keyFamilies.includes(s.family))) {
 			for (const root of ALL_PITCH_CLASSES) {
 				const letters = spellScale(root, s).notes.map((n) => n[0]);
 				expect(new Set(letters).size).toBe(7);
 			}
 		}
+	});
+});
+
+describe("practical spelling outside key-based scales", () => {
+	it("spells F minor blues with B, not C♭", () => {
+		expect(spell("F", "minor-blues").notes).toEqual([
+			"F",
+			"A♭",
+			"B♭",
+			"B",
+			"C",
+			"E♭",
+		]);
+	});
+
+	it("names the root as its nearest major or minor key does", () => {
+		expect(spell("A#", "minor-blues").root).toBe("B♭");
+		expect(spell("C#", "major-blues").root).toBe("D♭");
+		expect(spell("C#", "minor-pentatonic").root).toBe("C♯");
+	});
+
+	it("never uses C♭, F♭, E♯, B♯ or double accidentals", () => {
+		const awkward = /^(C♭|F♭|E♯|B♯)$|𝄪|𝄫/;
+		const keyFamilies = ["Major", "Harmonic minor", "Melodic minor"];
+		for (const s of SCALES.filter((s) => !keyFamilies.includes(s.family))) {
+			for (const root of ALL_PITCH_CLASSES) {
+				const odd = spellScale(root, s).notes.filter((n) => awkward.test(n));
+				expect(odd, `${s.id} on ${root}`).toEqual([]);
+			}
+		}
+	});
+
+	it("keeps strict theory spelling in key-based scales", () => {
+		expect(spell("F#", "ionian").notes).toContain("E♯");
+		expect(spell("G#", "harmonic-minor").notes).toContain("F𝄪");
 	});
 });
 

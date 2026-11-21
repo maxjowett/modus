@@ -69,6 +69,9 @@ export const Fretboard = memo(function Fretboard({
 					{match ? (
 						<>
 							<NoteName name={match.spelled.root} /> {match.scale.name}
+							{match.scale.altName && (
+								<span className="alt-name">{match.scale.altName}</span>
+							)}
 						</>
 					) : (
 						title

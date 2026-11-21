@@ -87,7 +87,12 @@ export default function App() {
 						inGroup={inGroup}
 						onAdd={addCurrent}
 					/>
-					<NoteGroup group={group} onToggle={toggle} onClear={clear} />
+					<NoteGroup
+						group={group}
+						hearing={reading?.pitchClass ?? null}
+						onToggle={toggle}
+						onClear={clear}
+					/>
 				</div>
 				<div className="study">
 					<Fretboard
