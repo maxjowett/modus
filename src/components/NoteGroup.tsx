@@ -1,10 +1,22 @@
-import { memo } from "react";
-import { noteLabel, PITCH_CLASSES, type PitchClass } from "../music/notes";
+import { Fragment, memo } from "react";
+import { PITCH_CLASSES, type PitchClass } from "../music/notes";
+import { bothNames } from "../music/spelling";
+import { NoteName } from "./NoteName";
 
 interface Props {
 	group: ReadonlySet<PitchClass>;
 	onToggle: (pc: PitchClass) => void;
 	onClear: () => void;
+}
+
+/** "A♯/B♭" for a black key: your notes aren't tied to a key, so show both. */
+function BothNames({ pc }: { pc: PitchClass }) {
+	return bothNames(pc).map((name, i) => (
+		<Fragment key={name}>
+			{i > 0 && <span className="enh-slash">/</span>}
+			<NoteName name={name} />
+		</Fragment>
+	));
 }
 
 export const NoteGroup = memo(function NoteGroup({
@@ -28,16 +40,28 @@ export const NoteGroup = memo(function NoteGroup({
 
 			{/* The buttons come first so the chips below can grow without moving them. */}
 			<fieldset className="manual" aria-label="Toggle notes manually">
-				{PITCH_CLASSES.map((name, pc) => (
-					<button
-						key={name}
-						type="button"
-						aria-pressed={group.has(pc)}
-						onClick={() => onToggle(pc)}
-					>
-						{noteLabel(pc)}
-					</button>
-				))}
+				{PITCH_CLASSES.map((key, pc) => {
+					const names = bothNames(pc);
+					return (
+						<button
+							key={key}
+							type="button"
+							aria-pressed={group.has(pc)}
+							aria-label={names.join(" / ")}
+							onClick={() => onToggle(pc)}
+						>
+							{/* Black keys stack sharp over flat. */}
+							{names.map((name) => (
+								<span
+									key={name}
+									className={names.length > 1 ? "enh-name" : undefined}
+								>
+									<NoteName name={name} />
+								</span>
+							))}
+						</button>
+					);
+				})}
 			</fieldset>
 
 			<div className="picked">
@@ -48,13 +72,13 @@ export const NoteGroup = memo(function NoteGroup({
 				) : (
 					<ul className="chips">
 						{PITCH_CLASSES.map(
-							(name, pc) =>
+							(key, pc) =>
 								group.has(pc) && (
-									<li key={name} className="chip">
-										{noteLabel(pc)}
+									<li key={key} className="chip">
+										<BothNames pc={pc} />
 										<button
 											type="button"
-											aria-label={`Remove ${noteLabel(pc)}`}
+											aria-label={`Remove ${bothNames(pc).join(" / ")}`}
 											onClick={() => onToggle(pc)}
 										>
 											×

@@ -13,7 +13,7 @@ export default function App() {
 	const [group, setGroup] = useState<ReadonlySet<PitchClass>>(new Set());
 	const [selected, setSelected] = useState<ScaleMatch | null>(null);
 
-	// Hide the fretboard while the selected scale isn't in the results.
+	// Drop back to just your notes while the selected scale isn't in the results.
 	const shownScale =
 		selected && isListed(selected.notes, group) ? selected : null;
 	const closeFretboard = useCallback(() => setSelected(null), []);
@@ -90,13 +90,11 @@ export default function App() {
 					<NoteGroup group={group} onToggle={toggle} onClear={clear} />
 				</div>
 				<div className="study">
-					{shownScale && (
-						<Fretboard
-							match={shownScale}
-							group={group}
-							onClose={closeFretboard}
-						/>
-					)}
+					<Fretboard
+						match={shownScale}
+						group={group}
+						onClose={closeFretboard}
+					/>
 					<ScaleResults
 						group={group}
 						selectedKey={shownScale && matchKey(shownScale)}

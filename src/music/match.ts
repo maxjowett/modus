@@ -6,6 +6,7 @@ import {
 	type Scale,
 	type ScaleFamily,
 } from "./scales";
+import { type SpelledScale, spellNote, spellScale } from "./spelling";
 
 /** Fewer notes than this fit too many scales to be useful, so none are shown. */
 export const MIN_GROUP_SIZE = 2;
@@ -27,6 +28,8 @@ export interface ScaleMatch {
 	scale: Scale;
 	/** The scale's pitch classes, in scale order starting from the root. */
 	notes: PitchClass[];
+	/** Note names as the key spells them (B♭, not A♯, in F major). */
+	spelled: SpelledScale;
 	/** Group notes that are not in the scale. */
 	missing: PitchClass[];
 	/** Share of the group's notes that are in the scale, 0–1. */
@@ -43,6 +46,15 @@ export interface FamilyMatches {
 /** Stable identity for a match, e.g. "ionian-0" for C major. */
 export function matchKey({ scale, root }: Pick<ScaleMatch, "scale" | "root">) {
 	return `${scale.id}-${root}`;
+}
+
+/** A note's name in the context of this scale, including notes outside it. */
+export function noteNameIn(
+	match: Pick<ScaleMatch, "notes" | "spelled">,
+	pc: PitchClass,
+): string {
+	const i = match.notes.indexOf(pc);
+	return i === -1 ? spellNote(pc, match.spelled.flats) : match.spelled.notes[i];
 }
 
 /** Group notes that are not in the scale, in pitch order. */
@@ -81,7 +93,8 @@ function bitCount(mask: number): number {
 const CANDIDATES = SCALES.filter(isParentScale).flatMap((scale) =>
 	ALL_PITCH_CLASSES.map((root) => {
 		const notes = scale.intervals.map((i) => toPitchClass(root + i));
-		return { root, scale, notes, mask: toMask(notes) };
+		const spelled = spellScale(root, scale);
+		return { root, scale, notes, spelled, mask: toMask(notes) };
 	}),
 );
 

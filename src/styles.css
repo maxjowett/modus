@@ -167,6 +167,17 @@ kbd {
 	color: var(--ink-soft);
 }
 
+/* Accidentals (see NoteName): the serif has no ♯/♭, and the fallback
+   glyphs sit loosely, so pull them in. Flats carry more space on the left. */
+.acc {
+	font-size: 0.82em;
+	margin-left: -0.02em;
+}
+
+.acc.flat {
+	margin-left: -0.22em;
+}
+
 /* Header */
 
 .app-header {
@@ -271,6 +282,17 @@ h1 {
 	letter-spacing: -0.04em;
 	font-variation-settings: "opsz" 144;
 	min-height: 0.9em;
+}
+
+/* In the big note, a small raised accidental, as it's often typeset. */
+.note-name .acc {
+	font-size: 0.5em;
+	vertical-align: 0.7em;
+	margin-left: -0.02em;
+}
+
+.note-name .acc.flat {
+	margin-left: -0.08em;
 }
 
 .note-name.is-empty {
@@ -397,10 +419,28 @@ h1 {
 }
 
 .manual button {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	/* Fits a black key's two stacked names, so every button is the same height. */
+	min-height: 52px;
 	font-family: var(--serif);
 	font-size: 1.0625rem;
+	line-height: 1.05;
 	border-radius: 10px;
-	padding: 8px 0;
+	padding: 4px 0;
+}
+
+/* Black keys: sharp over flat, smaller so both fit. */
+.manual .enh-name {
+	font-size: 0.8125rem;
+}
+
+.enh-slash {
+	margin: 0 0.08em;
+	opacity: 0.5;
+	font-weight: 400;
 }
 
 .manual button[aria-pressed="true"] {
@@ -537,6 +577,10 @@ h1 {
 	line-height: 1;
 	padding: 4px 10px;
 	color: var(--ink-soft);
+}
+
+.fretboard-hint {
+	margin-top: -8px;
 }
 
 .fretboard-scroll {

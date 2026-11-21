@@ -5,11 +5,13 @@ import {
 	INLAY_FRETS,
 	STANDARD_TUNING,
 } from "../music/guitar";
-import { missingNotes, type ScaleMatch } from "../music/match";
+import { missingNotes, noteNameIn, type ScaleMatch } from "../music/match";
 import { noteLabel, type PitchClass } from "../music/notes";
+import { NoteName } from "./NoteName";
 
 interface Props {
-	match: ScaleMatch;
+	/** The selected scale, or null to show just your notes. */
+	match: ScaleMatch | null;
 	group: ReadonlySet<PitchClass>;
 	onClose: () => void;
 }
@@ -45,19 +47,46 @@ export const Fretboard = memo(function Fretboard({
 	group,
 	onClose,
 }: Props) {
-	const title = `${noteLabel(match.root)} ${match.scale.name}`;
+	const title = match
+		? `${match.spelled.root} ${match.scale.name}`
+		: "On the neck";
 	// Your notes that fall outside the scale are drawn too, marked as such.
-	const missing = missingNotes(match.notes, group);
-	const positions = fretPositions([...match.notes, ...missing]);
+	const missing = match ? missingNotes(match.notes, group) : [];
+	const positions = fretPositions(match ? [...match.notes, ...missing] : group);
+	const nameOf = (pc: PitchClass) =>
+		match ? noteNameIn(match, pc) : noteLabel(pc);
+	const kindOf = (pc: PitchClass) => {
+		if (!match) return "played";
+		if (missing.includes(pc)) return "outside";
+		if (pc === match.root) return "root";
+		return group.has(pc) ? "played" : "scale";
+	};
 
 	return (
 		<section className="fretboard">
 			<header>
-				<h2>{title}</h2>
-				<button type="button" onClick={onClose} aria-label="Close fretboard">
-					×
-				</button>
+				<h2>
+					{match ? (
+						<>
+							<NoteName name={match.spelled.root} /> {match.scale.name}
+						</>
+					) : (
+						title
+					)}
+				</h2>
+				{match && (
+					<button type="button" onClick={onClose} aria-label="Close scale">
+						×
+					</button>
+				)}
 			</header>
+			{!match && (
+				<p className="muted fretboard-hint">
+					{group.size === 0
+						? "Play or tap in notes and they’ll appear here."
+						: "Pick a scale below to see the rest of its notes."}
+				</p>
+			)}
 
 			<div className="fretboard-scroll">
 				<svg
@@ -137,42 +166,47 @@ export const Fretboard = memo(function Fretboard({
 						</text>
 					))}
 
-					{positions.map(({ string, fret, pitchClass }) => {
-						const kind = missing.includes(pitchClass)
-							? "outside"
-							: pitchClass === match.root
-								? "root"
-								: group.has(pitchClass)
-									? "played"
-									: "scale";
-						return (
-							<g key={`${string}-${fret}`} className={`fb-note fb-${kind}`}>
-								<circle cx={fretX(fret)} cy={stringY(string)} r={DOT_RADIUS} />
-								<text x={fretX(fret)} y={stringY(string) + 4.5}>
-									{noteLabel(pitchClass)}
-								</text>
-							</g>
-						);
-					})}
+					{positions.map(({ string, fret, pitchClass }) => (
+						<g
+							key={`${string}-${fret}`}
+							className={`fb-note fb-${kindOf(pitchClass)}`}
+						>
+							<circle cx={fretX(fret)} cy={stringY(string)} r={DOT_RADIUS} />
+							<text x={fretX(fret)} y={stringY(string) + 4.5}>
+								{nameOf(pitchClass)}
+							</text>
+						</g>
+					))}
 				</svg>
 			</div>
 
-			<ul className="fretboard-legend">
-				<li>
-					<span className="swatch fb-root" /> Root
-				</li>
-				<li>
-					<span className="swatch fb-played" /> In your group
-				</li>
-				<li>
-					<span className="swatch fb-scale" /> Other scale notes
-				</li>
-				{missing.length > 0 && (
+			{match ? (
+				<ul className="fretboard-legend">
 					<li>
-						<span className="swatch fb-outside" /> Your notes outside the scale
+						<span className="swatch fb-root" /> Root
 					</li>
-				)}
-			</ul>
+					<li>
+						<span className="swatch fb-played" /> In your group
+					</li>
+					<li>
+						<span className="swatch fb-scale" /> Other scale notes
+					</li>
+					{missing.length > 0 && (
+						<li>
+							<span className="swatch fb-outside" /> Your notes outside the
+							scale
+						</li>
+					)}
+				</ul>
+			) : (
+				group.size > 0 && (
+					<ul className="fretboard-legend">
+						<li>
+							<span className="swatch fb-played" /> Your notes
+						</li>
+					</ul>
+				)
+			)}
 		</section>
 	);
 });

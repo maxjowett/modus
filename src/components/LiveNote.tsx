@@ -1,5 +1,6 @@
 import type { PitchReading } from "../audio/usePitchDetector";
 import { noteLabel } from "../music/notes";
+import { NoteName } from "./NoteName";
 
 interface Props {
 	reading: PitchReading | null;
@@ -31,7 +32,7 @@ export function LiveNote({
 		<section className="live-note" aria-live="polite">
 			<p className="eyebrow">Hearing</p>
 			<div className={reading ? "note-name" : "note-name is-empty"}>
-				{reading ? noteLabel(reading.pitchClass) : "—"}
+				{reading ? <NoteName name={noteLabel(reading.pitchClass)} /> : "—"}
 			</div>
 			<div className="meter" aria-hidden="true">
 				<span className="meter-flat">♭</span>

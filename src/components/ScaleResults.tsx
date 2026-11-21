@@ -4,9 +4,11 @@ import {
 	MIN_GROUP_SIZE,
 	matchKey,
 	NEAR_MISS_FROM,
+	noteNameIn,
 	type ScaleMatch,
 } from "../music/match";
-import { noteLabel, type PitchClass } from "../music/notes";
+import type { PitchClass } from "../music/notes";
+import { NoteName } from "./NoteName";
 
 interface Props {
 	group: ReadonlySet<PitchClass>;
@@ -57,7 +59,8 @@ export const ScaleResults = memo(function ScaleResults({
 									>
 										<span className="match-head">
 											<span className="match-name">
-												{noteLabel(match.root)} {match.scale.name}
+												<NoteName name={match.spelled.root} />{" "}
+												{match.scale.name}
 											</span>
 											{showPercent && (
 												<span
@@ -69,18 +72,21 @@ export const ScaleResults = memo(function ScaleResults({
 											)}
 										</span>
 										<span className="match-notes">
-											{match.notes.map((pc) => (
+											{match.notes.map((pc, i) => (
 												<span
 													key={pc}
 													className={group.has(pc) ? "hit" : undefined}
 												>
-													{noteLabel(pc)}
+													{match.spelled.notes[i]}
 												</span>
 											))}
 										</span>
 										{match.missing.length > 0 && (
 											<span className="match-missing">
-												not in scale: {match.missing.map(noteLabel).join(" ")}
+												not in scale:{" "}
+												{match.missing
+													.map((pc) => noteNameIn(match, pc))
+													.join(" ")}
 											</span>
 										)}
 									</button>

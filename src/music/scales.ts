@@ -23,6 +23,13 @@ export interface Scale {
 	 * itself). Modes share their parent's notes, so only mode 1 is matched.
 	 */
 	mode?: number;
+	/**
+	 * Which scale degree (1–7) each interval is, used to pick note letters:
+	 * degree 3 of C is some kind of E. Defaults to 1–7 for 7-note scales,
+	 * so required for every other size. Two intervals can share a degree,
+	 * like the ♭3 and 3 of a major blues scale.
+	 */
+	degrees?: number[];
 }
 
 /** Every rotation of a 7-note parent scale, named in order. */
@@ -64,24 +71,28 @@ export const SCALES: Scale[] = [
 		name: "Major pentatonic",
 		family: "Pentatonic & blues",
 		intervals: [0, 2, 4, 7, 9],
+		degrees: [1, 2, 3, 5, 6],
 	},
 	{
 		id: "minor-pentatonic",
 		name: "Minor pentatonic",
 		family: "Pentatonic & blues",
 		intervals: [0, 3, 5, 7, 10],
+		degrees: [1, 3, 4, 5, 7],
 	},
 	{
 		id: "major-blues",
 		name: "Major blues",
 		family: "Pentatonic & blues",
 		intervals: [0, 2, 3, 4, 7, 9],
+		degrees: [1, 2, 3, 3, 5, 6],
 	},
 	{
 		id: "minor-blues",
 		name: "Minor blues",
 		family: "Pentatonic & blues",
 		intervals: [0, 3, 5, 6, 7, 10],
+		degrees: [1, 3, 4, 5, 5, 7],
 	},
 	...modesOf(HARMONIC_MINOR, "Harmonic minor", [
 		["harmonic-minor", "Harmonic minor"],
@@ -106,18 +117,21 @@ export const SCALES: Scale[] = [
 		name: "Whole tone",
 		family: "Symmetric",
 		intervals: [0, 2, 4, 6, 8, 10],
+		degrees: [1, 2, 3, 4, 5, 7],
 	},
 	{
 		id: "diminished-hw",
 		name: "Diminished (half-whole)",
 		family: "Symmetric",
 		intervals: [0, 1, 3, 4, 6, 7, 9, 10],
+		degrees: [1, 2, 3, 3, 4, 5, 6, 7],
 	},
 	{
 		id: "diminished-wh",
 		name: "Diminished (whole-half)",
 		family: "Symmetric",
 		intervals: [0, 2, 3, 5, 6, 8, 9, 11],
+		degrees: [1, 2, 3, 4, 5, 6, 6, 7],
 	},
 	{
 		id: "double-harmonic",
@@ -148,13 +162,27 @@ export const SCALES: Scale[] = [
 		name: "Hirajoshi",
 		family: "Other",
 		intervals: [0, 2, 3, 7, 8],
+		degrees: [1, 2, 3, 5, 6],
 	},
-	{ id: "in", name: "In", family: "Other", intervals: [0, 1, 5, 7, 8] },
-	{ id: "yo", name: "Yo", family: "Other", intervals: [0, 2, 5, 7, 9] },
+	{
+		id: "in",
+		name: "In",
+		family: "Other",
+		intervals: [0, 1, 5, 7, 8],
+		degrees: [1, 2, 4, 5, 6],
+	},
+	{
+		id: "yo",
+		name: "Yo",
+		family: "Other",
+		intervals: [0, 2, 5, 7, 9],
+		degrees: [1, 2, 4, 5, 6],
+	},
 	{
 		id: "bebop-dominant",
 		name: "Bebop dominant",
 		family: "Other",
 		intervals: [0, 2, 4, 5, 7, 9, 10, 11],
+		degrees: [1, 2, 3, 4, 5, 6, 7, 7],
 	},
 ];
