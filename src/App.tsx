@@ -1,14 +1,37 @@
 import { useCallback, useEffect, useEffectEvent, useState } from "react";
 import { usePitchDetector } from "./audio/usePitchDetector";
+import { Fretboard } from "./components/Fretboard";
 import { ListenControl } from "./components/ListenControl";
 import { LiveNote } from "./components/LiveNote";
 import { NoteGroup } from "./components/NoteGroup";
 import { ScaleResults } from "./components/ScaleResults";
+import {
+	MIN_GROUP_SIZE,
+	matchFits,
+	matchKey,
+	type ScaleMatch,
+} from "./music/match";
 import type { PitchClass } from "./music/notes";
 
 export default function App() {
 	const { status, error, reading, start, stop } = usePitchDetector();
 	const [group, setGroup] = useState<ReadonlySet<PitchClass>>(new Set());
+	const [selected, setSelected] = useState<ScaleMatch | null>(null);
+
+	// Hide the fretboard while the selected scale isn't in the results.
+	const shownScale =
+		selected && group.size >= MIN_GROUP_SIZE && matchFits(selected, group)
+			? selected
+			: null;
+	const closeFretboard = useCallback(() => setSelected(null), []);
+	// Clicking the selected scale again closes it.
+	const selectScale = useCallback(
+		(match: ScaleMatch) =>
+			setSelected((prev) =>
+				prev && matchKey(prev) === matchKey(match) ? null : match,
+			),
+		[],
+	);
 
 	const inGroup = reading !== null && group.has(reading.pitchClass);
 	const canAdd = reading !== null && !inGroup;
@@ -65,7 +88,14 @@ export default function App() {
 				onAdd={addCurrent}
 			/>
 			<NoteGroup group={group} onToggle={toggle} onClear={clear} />
-			<ScaleResults group={group} />
+			{shownScale && (
+				<Fretboard match={shownScale} group={group} onClose={closeFretboard} />
+			)}
+			<ScaleResults
+				group={group}
+				selectedKey={shownScale && matchKey(shownScale)}
+				onSelect={selectScale}
+			/>
 		</main>
 	);
 }

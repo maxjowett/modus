@@ -7,7 +7,7 @@ import {
 	pitchClassFromName,
 	pitchClassName,
 } from "./notes";
-import { FAMILY_ORDER, SCALES } from "./scales";
+import { FAMILY_ORDER, isParentScale, SCALES } from "./scales";
 
 function groupOf(...names: PitchClassName[]) {
 	return new Set(names.map(pitchClassFromName));
@@ -20,11 +20,20 @@ function matchNames(...names: PitchClassName[]): string[] {
 }
 
 describe("findCompatibleScales", () => {
-	it("C major triad fits C major and A minor", () => {
+	it("C major triad fits C, F and G major but not E♭ major", () => {
 		const result = matchNames("C", "E", "G");
 		expect(result).toContain("C ionian");
-		expect(result).toContain("A aeolian");
-		expect(result).not.toContain("C aeolian");
+		expect(result).toContain("F ionian");
+		expect(result).toContain("G ionian");
+		expect(result).not.toContain("D# ionian");
+	});
+
+	it("shows only the parent scale, not its other modes", () => {
+		const result = findCompatibleScales(groupOf("C", "E", "G")).flatMap(
+			({ matches }) => matches,
+		);
+		expect(result.every((m) => isParentScale(m.scale))).toBe(true);
+		expect(matchNames("C", "E", "G")).not.toContain("A aeolian");
 	});
 
 	it("diminished triad fits diminished scales but not C major", () => {
@@ -33,15 +42,22 @@ describe("findCompatibleScales", () => {
 		expect(result).not.toContain("C ionian");
 	});
 
-	it("E major triad fits E major and C# minor but not E minor", () => {
+	it("E major triad fits E major but not G major (E minor's parent)", () => {
 		const result = matchNames("E", "G#", "B");
 		expect(result).toContain("E ionian");
-		expect(result).toContain("C# aeolian");
-		expect(result).not.toContain("E aeolian");
+		expect(result).not.toContain("G ionian");
 	});
 
 	it("returns nothing for an empty group", () => {
 		expect(findCompatibleScales(new Set())).toEqual([]);
+	});
+
+	it("returns nothing for a single note", () => {
+		expect(findCompatibleScales(groupOf("C"))).toEqual([]);
+	});
+
+	it("starts matching at two notes", () => {
+		expect(matchNames("C", "G")).toContain("C ionian");
 	});
 
 	it("returns nothing for all 12 notes", () => {
@@ -49,7 +65,9 @@ describe("findCompatibleScales", () => {
 	});
 
 	it("groups by family in display order", () => {
-		const families = findCompatibleScales(groupOf("C")).map((f) => f.family);
+		const families = findCompatibleScales(groupOf("C", "E")).map(
+			(f) => f.family,
+		);
 		expect(families).toEqual([...FAMILY_ORDER]);
 	});
 

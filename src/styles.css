@@ -9,6 +9,8 @@
 	--hit-bg: #dbeafe;
 	--hit-text: #1e40af;
 	--error: #b91c1c;
+	--root: #ea580c;
+	--root-text: #ffffff;
 	color-scheme: light;
 }
 
@@ -24,6 +26,8 @@
 		--hit-bg: #1e3a8a;
 		--hit-text: #dbeafe;
 		--error: #f87171;
+		--root: #fb923c;
+		--root-text: #0c0a09;
 		color-scheme: dark;
 	}
 }
@@ -252,8 +256,148 @@ kbd {
 	flex-wrap: wrap;
 	justify-content: space-between;
 	gap: 4px 16px;
-	padding: 8px 0;
+	width: 100%;
+	text-align: left;
+	padding: 8px;
+	border: none;
 	border-top: 1px solid var(--border);
+	border-radius: 0;
+}
+
+.match:hover {
+	background: var(--bg);
+}
+
+/* Selected result: keep the note highlights readable on the pressed background. */
+.match[aria-pressed="true"] {
+	color: var(--text);
+	box-shadow: inset 3px 0 0 var(--accent);
+}
+
+/* Fretboard */
+
+.fretboard {
+	display: grid;
+	gap: 12px;
+}
+
+@media (min-width: 720px) {
+	/* Keep the neck in view while scrolling the results below it. */
+	.fretboard {
+		position: sticky;
+		top: 8px;
+		z-index: 1;
+	}
+}
+
+.fretboard > header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.fretboard-scroll {
+	overflow-x: auto;
+}
+
+.fretboard svg {
+	display: block;
+	width: 100%;
+	min-width: 640px;
+	height: auto;
+}
+
+.fb-string,
+.fb-fret {
+	stroke: var(--muted);
+}
+
+.fb-fret {
+	stroke-width: 1.5;
+	opacity: 0.6;
+}
+
+.fb-nut {
+	stroke: var(--text);
+	stroke-width: 5;
+}
+
+.fb-inlay {
+	fill: var(--border);
+}
+
+.fb-number {
+	fill: var(--muted);
+	font-size: 12px;
+	text-anchor: middle;
+}
+
+.fb-note text {
+	font-size: 10px;
+	font-weight: 700;
+	text-anchor: middle;
+	pointer-events: none;
+}
+
+.fb-note circle {
+	stroke-width: 1.5;
+}
+
+.fb-root circle,
+.swatch.fb-root {
+	fill: var(--root);
+	background: var(--root);
+	stroke: var(--root);
+}
+.fb-root text {
+	fill: var(--root-text);
+}
+
+.fb-played circle,
+.swatch.fb-played {
+	fill: var(--accent);
+	background: var(--accent);
+	stroke: var(--accent);
+}
+.fb-played text {
+	fill: var(--accent-text);
+}
+
+.fb-scale circle,
+.swatch.fb-scale {
+	fill: var(--surface);
+	background: var(--surface);
+	stroke: var(--muted);
+}
+.fb-scale text {
+	fill: var(--text);
+}
+
+.fretboard-legend {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 20px;
+	color: var(--muted);
+	font-size: 0.875rem;
+}
+
+.fretboard-legend li {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.swatch {
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+}
+
+.swatch.fb-scale {
+	border: 1.5px solid var(--muted);
 }
 
 .match-name {

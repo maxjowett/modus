@@ -2,7 +2,7 @@ import { toPitchClass } from "./notes";
 
 /** Display order of the scale families. */
 export const FAMILY_ORDER = [
-	"Major modes",
+	"Major",
 	"Pentatonic & blues",
 	"Harmonic minor",
 	"Melodic minor",
@@ -18,6 +18,11 @@ export interface Scale {
 	family: ScaleFamily;
 	/** Semitones above the root, ascending, starting at 0. */
 	intervals: number[];
+	/**
+	 * For a mode of a 7-note parent scale, its position (1 = the parent
+	 * itself). Modes share their parent's notes, so only mode 1 is matched.
+	 */
+	mode?: number;
 }
 
 /** Every rotation of a 7-note parent scale, named in order. */
@@ -31,8 +36,13 @@ function modesOf(
 		const intervals = parent
 			.map((step) => toPitchClass(step - offset))
 			.sort((a, b) => a - b);
-		return { id, name, family, intervals };
+		return { id, name, family, intervals, mode: degree + 1 };
 	});
+}
+
+/** A scale that identifies its own note set: anything except modes 2–7. */
+export function isParentScale(scale: Scale): boolean {
+	return scale.mode === undefined || scale.mode === 1;
 }
 
 const MAJOR = [0, 2, 4, 5, 7, 9, 11];
@@ -40,7 +50,7 @@ const HARMONIC_MINOR = [0, 2, 3, 5, 7, 8, 11];
 const MELODIC_MINOR = [0, 2, 3, 5, 7, 9, 11];
 
 export const SCALES: Scale[] = [
-	...modesOf(MAJOR, "Major modes", [
+	...modesOf(MAJOR, "Major", [
 		["ionian", "Major (Ionian)"],
 		["dorian", "Dorian"],
 		["phrygian", "Phrygian"],
